@@ -6,19 +6,12 @@ export default class MyDocument extends Document {
       <Html>
         <Head>
           <link rel="preconnect" href="https://fonts.gstatic.com" />
-
-          <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-          />
-
           <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
             rel="stylesheet"
           />
 
-          <link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
+          <link rel="shortcut icon" href="favicon.png" type="image/png" />
         </Head>
         <body>
           <Main />
