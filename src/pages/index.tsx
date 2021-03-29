@@ -1,15 +1,14 @@
-import { GetStaticProps } from 'next';
 import Prismic from '@prismicio/client';
-import { FiCalendar, FiUser } from 'react-icons/fi';
-
-import { useCallback, useEffect, useState } from 'react';
+import { GetStaticProps } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
-import { getPrismicClient } from '../services/prismic';
-
-import commonStyles from '../styles/common.module.scss';
-import styles from './home.module.scss';
-import { dateFormat } from '../utils/dateFormat';
+import { useCallback, useState } from 'react';
+import { FiCalendar, FiUser } from 'react-icons/fi';
 import Header from '../components/Header';
+import { getPrismicClient } from '../services/prismic';
+import commonStyles from '../styles/common.module.scss';
+import { dateFormat } from '../utils/dateFormat';
+import styles from './home.module.scss';
 
 interface Post {
   uid?: string;
@@ -46,6 +45,9 @@ const Home: React.FC<HomeProps> = ({ postsPagination }) => {
 
   return (
     <>
+      <Head>
+        <title>Spacetraveling | Página Inicial</title>
+      </Head>
       <Header />
       <main className={`${commonStyles.container}`}>
         <div className={styles.posts}>
@@ -54,7 +56,7 @@ const Home: React.FC<HomeProps> = ({ postsPagination }) => {
               <a key={post.uid}>
                 <h1>{post.data.title}</h1>
                 <p>{post.data.subtitle}</p>
-                <div className={commonStyles.postInfo}>
+                <div key={post.uid} className={commonStyles.postInfo}>
                   <p>
                     <FiCalendar />
                     {dateFormat(new Date(post.first_publication_date))}

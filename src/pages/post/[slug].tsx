@@ -1,5 +1,6 @@
 import Prismic from '@prismicio/client';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { RichText } from 'prismic-dom';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
@@ -28,14 +29,25 @@ interface Post {
 
 interface PostProps {
   post: Post;
-  readingTime: string;
 }
 
-const Post: React.FC<PostProps> = ({ post, readingTime }) => {
+const Post: React.FC<PostProps> = ({ post }) => {
   const { isFallback } = useRouter();
+
+  const words = post.data.content.reduce((acc, content) => {
+    // eslint-disable-next-line no-param-reassign
+    acc += `${content.heading} ${RichText.asText(content.body)} `;
+    return acc;
+  }, '');
+
+  const readingTime = Math.ceil(words.split(' ').length / 200);
 
   return (
     <>
+      <Head>
+        <title>Spacetraveling | {post.data?.title}</title>
+      </Head>
+
       <Header />
       <img className={styles.banner} src={post.data.banner.url} alt="Banner" />
       {isFallback ? (
@@ -54,7 +66,7 @@ const Post: React.FC<PostProps> = ({ post, readingTime }) => {
               </p>
               <p>
                 <FiClock />
-                {readingTime} min
+                {`${readingTime} min`}
               </p>
             </div>
             <div className={styles.content}>
@@ -91,12 +103,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
   const response: Post = await prismic.getByUID('post', String(slug), {});
 
-  const words = response.data.content.reduce((acc, content) => {
-    return ` ${content.heading} ${RichText.asText(content.body)}`;
-  }, '');
-
-  const readingTime = Math.ceil(words.split(' ').length / 200);
-
-  return { props: { post: response, readingTime } };
+  return { props: { post: response } };
 };
 export default Post;
