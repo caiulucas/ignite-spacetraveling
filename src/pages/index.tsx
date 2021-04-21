@@ -27,9 +27,10 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
-const Home: React.FC<HomeProps> = ({ postsPagination }) => {
+const Home: React.FC<HomeProps> = ({ postsPagination, preview }) => {
   const [posts, setPosts] = useState(postsPagination.results);
   const [nextPage, setNextPage] = useState(postsPagination.next_page || null);
 
@@ -73,21 +74,41 @@ const Home: React.FC<HomeProps> = ({ postsPagination }) => {
               Carregar mais posts
             </button>
           )}
+          {preview ? (
+            <aside className={styles.previewLink}>
+              <Link href="/api/exit-preview">
+                <a>Sair do modo Preview</a>
+              </Link>
+            </aside>
+          ) : (
+            <aside className={styles.previewLink}>
+              <Link href="/api/preview">
+                <a>Entrar do modo Preview</a>
+              </Link>
+            </aside>
+          )}
         </div>
       </main>
     </>
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const { results, next_page } = await prismic.query(
     [Prismic.predicates.at('document.type', 'post')],
-    { fetch: ['post.title', 'post.subtitle', 'post.author'], pageSize: 10 }
+    {
+      fetch: ['post.title', 'post.subtitle', 'post.author'],
+      pageSize: 10,
+      ref: previewData?.ref ?? null,
+    }
   );
 
   return {
-    props: { postsPagination: { results, next_page } },
+    props: { postsPagination: { results, next_page }, preview },
     revalidate: 60 * 60,
   }; // 1 hour
 };

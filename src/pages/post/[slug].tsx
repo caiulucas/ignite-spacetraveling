@@ -4,14 +4,20 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { RichText } from 'prismic-dom';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+
+import Link from 'next/link';
 import Header from '../../components/Header';
+import Comment from '../../components/Comment';
+
 import { getPrismicClient } from '../../services/prismic';
-import commonStyles from '../../styles/common.module.scss';
 import { dateFormat } from '../../utils/dateFormat';
+
+import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -27,11 +33,20 @@ interface Post {
   };
 }
 
-interface PostProps {
-  post: Post;
+interface NavigablePost {
+  uid: string;
+  data: {
+    title: string;
+  };
 }
 
-const Post: React.FC<PostProps> = ({ post }) => {
+interface PostProps {
+  post: Post;
+  prevPost: NavigablePost;
+  nextPost: NavigablePost;
+}
+
+const Post: React.FC<PostProps> = ({ post, prevPost, nextPost }) => {
   const { isFallback } = useRouter();
 
   const words = post.data.content.reduce((acc, content) => {
@@ -69,6 +84,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
                 {`${readingTime} min`}
               </p>
             </div>
+            <i className={styles.editInfo}>
+              * Editado em{' '}
+              {dateFormat(new Date(post.last_publication_date), true)}
+            </i>
             <div className={styles.content}>
               {post.data.content.map(content => (
                 <div>
@@ -79,7 +98,33 @@ const Post: React.FC<PostProps> = ({ post }) => {
                 </div>
               ))}
             </div>
+
+            <div className={styles.navigationContainer}>
+              {prevPost ? (
+                <Link href={`/post/${prevPost.uid}`}>
+                  <a>
+                    <h3>{prevPost.data.title}</h3>
+
+                    <p>Post anterior</p>
+                  </a>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {nextPost && (
+                <Link href={`/post/${nextPost.uid}`}>
+                  <a className={styles.nextPost}>
+                    <h3>{nextPost.data.title}</h3>
+
+                    <p>Próximo post</p>
+                  </a>
+                </Link>
+              )}
+            </div>
           </div>
+
+          <Comment />
         </main>
       )}
     </>
@@ -103,6 +148,36 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
   const response: Post = await prismic.getByUID('post', String(slug), {});
 
-  return { props: { post: response } };
+  const prevResponse = await prismic.query(
+    Prismic.predicates.at('document.type', 'post'),
+    {
+      pageSize: 1,
+      after: String(slug),
+      orderings: '[document.last_publication_date desc]',
+    }
+  );
+
+  const nextResponse = await prismic.query(
+    Prismic.predicates.at('document.type', 'post'),
+    {
+      pageSize: 1,
+      after: String(slug),
+      orderings: '[document.last_publication_date]',
+    }
+  );
+
+  const prevPost =
+    prevResponse.results[0].uid !== slug ? prevResponse.results[0] : null;
+
+  const nextPost =
+    nextResponse.results[0].uid !== slug ? nextResponse.results[0] : null;
+
+  return {
+    props: {
+      post: response,
+      prevPost,
+      nextPost,
+    },
+  };
 };
 export default Post;

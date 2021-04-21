@@ -12,6 +12,13 @@
   margin-bottom: 5rem;
 }
 
+.editInfo {
+  display: block;
+  color: var(--gray-200);
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
 .content {
   margin: 4rem 0 5rem 0;
 
@@ -32,5 +39,37 @@
         margin-top: 2rem;
       }
   }
+  }
+}
+
+.navigationContainer {
+  border-top: 1px solid #d7d7d71a;
+  padding-top: 3rem;
+  margin-bottom: 5rem;
+  display: flex;
+  justify-content: space-between;  
+
+  a {
+    transition: color 0.2s;
+    &:hover {
+      color: var(--pink-700);
+    }
+
+    &.nextPost {
+      p { 
+        text-align: end;
+      }
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--pink-700);
+      font-weight: 600;
+    }
   }
 }
